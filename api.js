@@ -3,9 +3,15 @@ const express = require('express')
 const app = express()
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const XLSX = require('xlsx');
+
+const workbook = XLSX.readFile("students.xlsx");
+const worksheet = workbook.Sheets["students"];
+
+const students = XLSX.utils.sheet_to_json(worksheet);
 
 app.use(cors({
-  origin: 'https://mohamadalasaed.github.io'
+  origin: 'http://127.0.0.1:5500'
 }));
 
 app.use(bodyParser.json());
@@ -16,6 +22,19 @@ app.get('/', function (req, res) {
 
 app.get('/lebanonCities', function (req, res) {
   res.send(Cities)
+})
+
+app.get('/students', (req, res) => {    
+  res.send(students)
+})
+
+app.post('/addstudent', (req, res) => {
+  console.log(req.body);
+  XLSX.utils.sheet_add_aoa(worksheet, [[req.body.name, req.body.age]], { origin: -1 });
+  XLSX.writeFile(workbook, "students.xlsx");
+  //students.push({ name: req.body.name, age: req.body.age });
+  students = XLSX.utils.sheet_to_json(worksheet);
+  res.send(students)
 })
 
 app.listen(3000)
